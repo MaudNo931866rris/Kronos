@@ -71,6 +71,14 @@ def prepare_stock_data(csv_file_path, stock_code):
     # 去除重复日期（保留最后一条）
     df = df.drop_duplicates(subset='timestamps', keep='last').reset_index(drop=True)
 
+    # 去除收盘价为0或NaN的异常数据（停牌日等）
+    if 'close' in df.columns:
+        before = len(df)
+        df = df[df['close'] > 0].dropna(subset=['close']).reset_index(drop=True)
+        removed = before - len(df)
+        if removed > 0:
+            print(f"⚠️ 已移除 {removed} 条无效收盘价记录（停牌或数据缺失）")
+
     print(f"✅ 数据加载完成，共 {len(df)} 条记录")
     print(f"时间范围: {df['timestamps'].min()} 到 {df['timestamps'].max()}")
     print(f"数据列: {df.columns.tolist()}")
@@ -118,11 +126,4 @@ def generate_future_dates_with_holidays(last_date, pred_len):
 
     参数:
     last_date: 最后一个历史数据的日期
-    pred_len: 预测期数
-
-    返回:
-    future_dates: 未来的交易日日期列表
-    """
-    # 中国主要节假日（需要根据实际情况调整）
-    holidays_2025 = [
-        # 2025年国庆
+    pred
