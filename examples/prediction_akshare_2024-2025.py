@@ -86,13 +86,13 @@ def prepare_stock_data(csv_file_path, stock_code):
     return df
 
 
-def calculate_prediction_parameters(df, target_days=60):
+def calculate_prediction_parameters(df, target_days=30):
     """
     根据目标预测天数计算合适的参数
 
     参数:
     df: 股票数据DataFrame
-    target_days: 目标预测天数（自然日），默认改为60天，实测效果更稳定
+    target_days: 目标预测天数（自然日），改回30天，个人觉得短期预测更实用
 
     返回:
     lookback: 回看期数
@@ -108,22 +108,9 @@ def calculate_prediction_parameters(df, target_days=60):
 
     # 设置回看期数为预测期数的2-3倍，但不超过数据总量的70%
     max_lookback = int(len(df) * 0.7)
-    lookback = min(pred_trading_days * 2, max_lookback, len(df) - pred_trading_days)
+    lookback = min(pred_trading_days * 3, max_lookback, len(df) - pred_trading_days)
     pred_len = min(pred_trading_days, len(df) - lookback)
 
     print(f"📊 参数计算:")
     print(f"  目标预测天数: {target_days} 天（自然日）")
-    print(f"  预计交易日数量: {pred_trading_days} 天")
-    print(f"  回看期数 (lookback): {lookback}")
-    print(f"  预测期数 (pred_len): {pred_len}")
-
-    return lookback, pred_len
-
-
-def generate_future_dates_with_holidays(last_date, pred_len):
-    """
-    生成未来的交易日日期，考虑中国节假日
-
-    参数:
-    last_date: 最后一个历史数据的日期
-    pred
+    print(f"  预计交易日数量: ")
