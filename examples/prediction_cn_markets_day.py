@@ -23,6 +23,7 @@ Example:
 Notes (personal):
     - Increased LOOKBACK to 480 for more context; seemed to improve trend continuity on index symbols.
     - SAMPLE_COUNT bumped to 3 so we can average multiple samples for a smoother prediction.
+    - Bumped max_retries to 5 after hitting transient akshare timeouts during market hours.
 """
 
 import os
@@ -52,7 +53,7 @@ SAMPLE_COUNT = 3  # increased from 1; average over multiple samples
 def load_data(symbol: str) -> pd.DataFrame:
     print(f"📥 Fetching {symbol} daily data from akshare ...")
 
-    max_retries = 3
+    max_retries = 5  # increased from 3; akshare can be flaky during peak hours
     df = None
 
     # Retry mechanism
@@ -97,12 +98,4 @@ def load_data(symbol: str) -> pd.DataFrame:
     # Fix invalid open values
     open_bad = (df["open"] == 0) | (df["open"].isna())
     if open_bad.any():
-        print(f"⚠️  Fixed {open_bad.sum()} invalid open values.")
-        df.loc[open_bad, "open"] = df["close"].shift(1)
-        df["open"].fillna(df["close"], inplace=True)
-
-    # Fix missing amount
-    if df["amount"].isna().all() or (df["amount"] == 0).all():
-        df["amount"] = df["close"] * df["volume"]
-
-    print(f"✅ Data loaded: {l
+        print(f"⚠️  Fixed {
